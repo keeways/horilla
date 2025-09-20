@@ -15,7 +15,21 @@ services:
     depends_on:
       db:
         condition: service_healthy
-
+    labels:
+      - traefik.docker.network=dokploy-network
+      - traefik.http.routers.keeways-internal-horilla-kzjoae-21-web.rule=Host(`hr.keeways.com`)
+      - traefik.http.routers.keeways-internal-horilla-kzjoae-21-web.entrypoints=web
+      - traefik.http.services.keeways-internal-horilla-kzjoae-21-web.loadbalancer.server.port=8000
+      - traefik.http.routers.keeways-internal-horilla-kzjoae-21-web.service=keeways-internal-horilla-kzjoae-21-web
+      - traefik.http.routers.keeways-internal-horilla-kzjoae-21-web.middlewares=redirect-to-https@file
+      - traefik.http.routers.keeways-internal-horilla-kzjoae-21-websecure.rule=Host(`hr.keeways.com`)
+      - traefik.http.routers.keeways-internal-horilla-kzjoae-21-websecure.entrypoints=websecure
+      - traefik.http.services.keeways-internal-horilla-kzjoae-21-websecure.loadbalancer.server.port=8000
+      - traefik.http.routers.keeways-internal-horilla-kzjoae-21-websecure.service=keeways-internal-horilla-kzjoae-21-websecure
+      - traefik.http.routers.keeways-internal-horilla-kzjoae-21-websecure.tls.certresolver=letsencrypt
+      - traefik.enable=true
+    networks:
+      - dokploy-network
   db:
     image: postgres:16-bullseye
     environment:
@@ -34,6 +48,10 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
+    networks:
+      - dokploy-network 
 volumes:
   horilla-data:
+networks:
+  dokploy-network:
+    external: true
